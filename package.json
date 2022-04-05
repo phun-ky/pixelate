@@ -1,0 +1,21 @@
+{
+  "name": "pixelate",
+  "version": "0.0.0",
+  "description": "A script to create pixelized images replaced with photoes to make your own mosaic",
+  "main": "index.js",
+  "scripts": {
+    "commit": "npx git-cz",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phun-ky/pixelate.git"
+  },
+  "keywords": ["pixelate","mosaic", "photos"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phun-ky/pixelate/issues"
+  },
+  "homepage": "https://github.com/phun-ky/pixelate#readme"
+}
