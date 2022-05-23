@@ -1,6 +1,6 @@
 {
   "name": "pixelate",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A script to create pixelized images replaced with photoes to make your own mosaic",
   "main": "index.js",
   "scripts": {
