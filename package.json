@@ -5,17 +5,53 @@
   "main": "index.js",
   "scripts": {
     "commit": "npx git-cz",
+    "version": "npm run util:update-changelog && git add CHANGELOG.md",
+    "util:update-changelog": "npx conventional-changelog -p conventionalcommits -i ./CHANGELOG.md -s",
+    "util:create-changelog": "npx conventional-changelog -p conventionalcommits --release-count 0 --outfile ./CHANGELOG.md",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "pixelate": "./cli.mjs"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/phun-ky/pixelate.git"
   },
-  "keywords": ["pixelate","mosaic", "photos"],
+  "keywords": [
+    "pixelate",
+    "mosaic",
+    "photos"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/phun-ky/pixelate/issues"
   },
-  "homepage": "https://github.com/phun-ky/pixelate#readme"
+  "homepage": "https://github.com/phun-ky/pixelate#readme",
+  "devDependencies": {
+    "commitizen": "^4.2.4",
+    "conventional-changelog-cli": "^2.2.2",
+    "conventional-changelog-conventionalcommits": "^4.6.3",
+    "cz-conventional-changelog": "^3.0.1",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-compat": "^4.0.2",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "git-cz": "^4.7.6",
+    "prettier": "^2.6.2",
+    "prettier-eslint": "^13.0.0"
+  },
+  "dependencies": {
+    "glob": "^7.2.0",
+    "meow": "^10.1.2",
+    "ora": "^6.1.0",
+    "winston": "^3.7.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
