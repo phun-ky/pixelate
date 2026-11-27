@@ -2,13 +2,13 @@
   "name": "pixelate",
   "version": "0.0.1",
   "description": "A script to create pixelized images replaced with photoes to make your own mosaic",
-  "main": "index.js",
+  "main": "cli.mjs",
   "scripts": {
     "commit": "npx git-cz",
     "version": "npm run util:update-changelog && git add CHANGELOG.md",
     "util:update-changelog": "npx conventional-changelog -p conventionalcommits -i ./CHANGELOG.md -s",
     "util:create-changelog": "npx conventional-changelog -p conventionalcommits --release-count 0 --outfile ./CHANGELOG.md",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "bin": {
     "pixelate": "./cli.mjs"
@@ -44,14 +44,15 @@
     "prettier-eslint": "^13.0.0"
   },
   "dependencies": {
-    "glob": "^7.2.0",
     "meow": "^10.1.2",
-    "ora": "^6.1.0",
-    "winston": "^3.7.2"
+    "sharp": "^0.35.5"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "engines": {
+    "node": ">=18.17"
   }
 }

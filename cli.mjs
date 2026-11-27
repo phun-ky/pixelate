@@ -1,86 +1,63 @@
 #!/usr/bin/env node
-/* eslint no-console:0 no-useless-escape:0*/
-'use strict';
-
 import meow from 'meow';
-import { colors, colorsBin } from './colors.mjs';
-import winston, { format, transports } from 'winston';
-
-const { combine, timestamp, label, colorize, printf } = format;
-const _transports = [
-  new transports.File({ filename: 'error.log', level: 'error' }),
-  new transports.File({ filename: 'combined.log' })
-];
-
-winston.loggers.add('default', {
-  level: 'info',
-  format: winston.format.json()
-});
-
-const _pixelate_log_format = printf(({ level, message, label, timestamp }) => {
-  return `${timestamp} [${label}] ${level}: ${message}`;
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  _transports.push(
-    new transports.Console({
-      format: combine(
-        label({ label: 'pixelate' }),
-        timestamp(),
-        _pixelate_log_format,
-        colorize({
-          all: true
-        })
-      )
-    })
-  );
-}
+import { connect, pickPhotos } from './google.mjs';
+import { buildMosaic } from './mosaic.mjs';
 
 const cli = meow(
   `
-	Usage
-	  $ pixelate <options>
+  Usage
+    $ pixelate connect                Connect your Google account
+    $ pixelate pick                   Pick the photos to build from in Google Photos
+    $ pixelate build <target-image>   Build the mosaic
 
-	Options
-	  --colors <image>, -c <image> Get colors from <image>
-	  --bin <path>, -b <path> Get the dominent color from each image in <path>
-	  --loglevel=<loglevel>, -l <loglevel> Set log level to <loglevel>
+  Options
+    --tiles, -t  Folder for the tile photos (default: tiles)
+    --cols, -c   Tiles across (default: 80)
+    --size, -s   Pixel size of each tile in the output (default: 32)
+    --tint       0-1, how much each tile is tinted toward its cell colour (default: 0.2)
+    --out, -o    Output file (default: mosaic.jpg)
 
-	Examples
-	  $ pixelate --colors 20180711_185145.jpg
-	  <result>
-	  $ pixelate --colors-bin img/
-	  <result>
+  Examples
+    $ pixelate pick
+    $ pixelate build me.jpg --cols 100 --out me-mosaic.jpg
 `,
   {
     importMeta: import.meta,
     flags: {
-      colors: {
-        type: 'boolean',
-        alias: 'c'
-      },
-      bin: {
-        type: 'string',
-        alias: 'b'
-      }
+      tiles: { type: 'string', alias: 't', default: 'tiles' },
+      cols: { type: 'number', alias: 'c', default: 80 },
+      size: { type: 'number', alias: 's', default: 32 },
+      tint: { type: 'number', default: 0.2 },
+      out: { type: 'string', alias: 'o', default: 'mosaic.jpg' }
     }
   }
 );
-const logger = winston.loggers.get('default');
 
-logger.configure({
-  level: cli.flags.l || 'info',
-  transports: _transports
-});
+const [command, target] = cli.input;
+const { tiles, cols, size, tint, out } = cli.flags;
 
-logger.silly(JSON.stringify(cli, null, 2));
-logger.debug(`Input used: ${JSON.stringify(cli.input, null, 2)}`);
-logger.debug(`Options used: ${JSON.stringify(cli.flags, null, 2)}`);
+try {
+  if (command === 'connect') {
+    await connect();
+    console.error('Connected to Google Photos.');
+  } else if (command === 'pick') {
+    const count = await pickPhotos(tiles);
 
-if (cli.flags.colors && cli.input.length !== 0) {
-  colors(cli.input[0]);
-} else if (cli.flags.bin !== '') {
-  colorsBin(cli.flags.bin);
-} else {
-  logger.info('No input or valid command found');
+    console.error(`${count} photos saved to ${tiles}/. Now run: pixelate build <target-image>`);
+  } else if (command === 'build' && target) {
+    if (!Number.isInteger(cols) || cols < 1) throw new Error('--cols must be a positive whole number');
+
+    if (!Number.isInteger(size) || size < 1) throw new Error('--size must be a positive whole number');
+
+    if (!(tint >= 0 && tint <= 1)) throw new Error('--tint must be between 0 and 1');
+
+    const r = await buildMosaic({ target, tilesDir: tiles, cols, tileSize: size, tint, out });
+
+    console.error(`${out}: ${r.width}x${r.height}, ${r.cols}x${r.rows} cells, ${r.unique} of ${r.tiles} photos used`);
+  } else {
+    cli.showHelp();
+  }
+} catch (e) {
+  console.error(`pixelate: ${e.message}`);
+  process.exit(1);
 }
